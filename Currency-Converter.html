@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MaxMentor World Currency Converter</title>
+<style>
+*{box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    margin:3; color:#fff; padding-bottom:60px; overflow-x:hidden;
+}
+/* HEADER */
+header{
+    position:fixed;top:0;left:0;width:100%;height:60px;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 20px;background:#000000aa;z-index:1000;
+}
+header .logo{font-size:1.5rem;font-weight:bold;}
+#menuButton{
+    background:#fff;color:#333;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;
+}
+/* SIDEBAR */
+nav{
+    position:fixed;top:60px;right:-220px;height:calc(100vh-60px);width:220px;
+    display:flex;flex-direction:column;align-items:center;gap:20px;
+    padding:20px 10px;background:#000000cc;transition:.3s;z-index: 1;height:100%;
+}
+nav.active{right:0;}
+nav a{color:#fff;text-decoration:none;padding:10px;border-radius:20px;background:#ffffff22;}
+nav a:hover{background:#ffffff44;}
+/* MAIN */
+.container{
+    width:100%;max-width:700px;margin:100px auto 20px auto;
+    background:#ffffff15;backdrop-filter:blur(8px);
+    border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+h2{text-align:center;margin-bottom:20px;}
+select,input{
+    width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px;font-size:1rem;
+}
+button.convertBtn{
+    width:100%;padding:12px;background:#fff;color:#333;border:none;border-radius:8px;cursor:pointer;
+}
+button.convertBtn:hover{background:#f0f0f0;}
+.result{margin-top:15px;font-size:1.3rem;color:#00ffcc;text-align:center;}
+/* FOOTER */
+footer{
+    position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:12px;background:#000000aa;
+}
+footer a{color:#fff;text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+/* POPUP */
+.popup{
+    position:fixed; inset:0;background:#000000aa;display:none;align-items:center;justify-content:center;
+}
+.popup-content{
+    background:#fff;color:#333;padding:20px;border-radius:14px;text-align:center;max-width:300px;
+}
+.popup-content img{width:200px;margin:10px 0;}
+@media(max-width:768px){
+    .container{margin:120px 0px 20px 0px;}
+    #menuButton{padding:8px 12px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">MaxMentor</div>
+    <button id="menuButton">☰ Menu</button>
+</header>
+
+<nav id="sidebar">
+    <a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+    <a href="#" onclick="openPopup()">☕ Buy Me Coffee</a>
+</nav>
+
+<div class="container">
+<h2>World Currency Converter</h2>
+
+<input type="number" id="amount" placeholder="Enter amount" value="1">
+
+<select id="fromCurr"></select>
+<select id="toCurr"></select>
+
+<button class="convertBtn" onclick="convertNow()">Convert</button>
+
+<div class="result" id="resultBox"></div>
+</div>
+
+<footer>
+© 2025–Present <a href="#">MaxMentor</a>
+</footer>
+
+<div class="popup" id="popup">
+<div class="popup-content">
+<h3>Support MaxMentor ☕</h3>
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg" alt="UPI QR">
+<br>
+<button onclick="closePopup()">Close</button>
+</div>
+</div>
+
+<script>
+const menuBtn=document.getElementById('menuButton'),
+      sidebar=document.getElementById('sidebar');
+menuBtn.addEventListener('click',()=>sidebar.classList.toggle('active'));
+function openPopup(){popup.style.display='flex';}
+function closePopup(){popup.style.display='none';}
+
+const fromSel=document.getElementById('fromCurr'),
+      toSel=document.getElementById('toCurr'),
+      resultBox=document.getElementById('resultBox');
+
+// World currencies list using ISO 4217 standard
+// (This is part of the full global list — more codes can be added if needed) :contentReference[oaicite:1]{index=1}
+const currencyData=[
+["Afghanistan Afghani","AFN"],["Albania Lek","ALL"],["Algeria Dinar","DZD"],
+["Argentina Peso","ARS"],["Armenia Dram","AMD"],["Aruba Guilder","AWG"],
+["Australia Dollar","AUD"],["Azerbaijan Manat","AZN"],["Bahamas Dollar","BSD"],
+["Bahrain Dinar","BHD"],["Bangladesh Taka","BDT"],["Barbados Dollar","BBD"],
+["Belarus Ruble","BYN"],["Belgium Euro","EUR"],["Belize Dollar","BZD"],
+["Botswana Pula","BWP"],["Brazil Real","BRL"],["Brunei Dollar","BND"],
+["Bulgaria Lev","BGN"],["Canada Dollar","CAD"],["Chile Peso","CLP"],
+["China Yuan","CNY"],["Colombia Peso","COP"],["Costa Rica Colon","CRC"],
+["Croatia Kuna","HRK"],["Czech Republic Koruna","CZK"],["Denmark Krone","DKK"],
+["Dominican Peso","DOP"],["Egypt Pound","EGP"],["Eurozone Euro","EUR"],
+["Fiji Dollar","FJD"],["Ghana Cedi","GHS"],["Guatemala Quetzal","GTQ"],
+["Hong Kong Dollar","HKD"],["Hungary Forint","HUF"],["Iceland Krona","ISK"],
+["India Rupee","INR"],["Indonesia Rupiah","IDR"],["Israel Shekel","ILS"],
+["Japan Yen","JPY"],["Kazakhstan Tenge","KZT"],["Kenya Shilling","KES"],
+["Kuwait Dinar","KWD"],["Malaysia Ringgit","MYR"],["Mexico Peso","MXN"],
+["Morocco Dirham","MAD"],["Myanmar Kyat","MMK"],["Nepal Rupee","NPR"],
+["New Zealand Dollar","NZD"],["Norway Krone","NOK"],["Oman Rial","OMR"],
+["Pakistan Rupee","PKR"],["Philippines Peso","PHP"],["Poland Zloty","PLN"],
+["Qatar Riyal","QAR"],["Romania Leu","RON"],["Russia Ruble","RUB"],
+["Saudi Riyal","SAR"],["Singapore Dollar","SGD"],["South Africa Rand","ZAR"],
+["South Korea Won","KRW"],["Sweden Krona","SEK"],["Switzerland Franc","CHF"],
+["Taiwan Dollar","TWD"],["Thailand Baht","THB"],["Turkey Lira","TRY"],
+["UAE Dirham","AED"],["UK Pound","GBP"],["USA Dollar","USD"],["Vietnam Dong","VND"]
+];
+
+function populateCurrencies(){
+    currencyData.forEach(item=>{
+        const code=item[1], name=item[0];
+        const opt1=document.createElement('option');
+        opt1.value=code;
+        opt1.text=`${name} (${code})`;
+        fromSel.add(opt1);
+        const opt2=document.createElement('option');
+        opt2.value=code;
+        opt2.text=`${name} (${code})`;
+        toSel.add(opt2);
+    });
+    fromSel.value="USD";
+    toSel.value="INR";
+}
+populateCurrencies();
+
+// Convert using API Layer
+async function convertNow(){
+    const amt=parseFloat(document.getElementById('amount').value);
+    const from=fromSel.value;
+    const to=toSel.value;
+    if(isNaN(amt)) return alert('Enter valid amount');
+    try{
+        const url=`https://api.apilayer.com/currency_data/live?base=${from}&symbols=${to}`;
+        const res=await fetch(url,{method:"GET",headers:{"apikey":"FylrwBYpOwOfq3GYwSqd0F34JDtUrIFW"}});
+        const data=await res.json();
+        if(data && data.quotes && data.quotes[from+to]){
+            const rate=data.quotes[from+to];
+            const result=(amt*rate).toFixed(4);
+            resultBox.textContent=`${amt} ${from} = ${result} ${to}`;
+        } else resultBox.textContent="Conversion failed";
+    }catch{
+        resultBox.textContent="Conversion failed";
+    }
+}
+</script>
+
+</body>
+</html>

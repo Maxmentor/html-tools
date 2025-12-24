@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MaxMentor Advanced Note Pad</title>
+<style>
+*{box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    margin:4; padding-bottom:60px;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    color:#fff; overflow-x:hidden;
+}
+header{
+    position:fixed;top:0;left:0;width:100%;height:60px;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 20px;background:#000000aa;z-index:1000;
+}
+header .logo{font-size:1.5rem;font-weight:bold;}
+#menuButton{background:#fff;color:#333;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;}
+nav{
+    position:fixed;top:60px;right:-220px;height:calc(100vh - 60px);width:220px;
+    display:flex;flex-direction:column;align-items:center;gap:20px;
+    padding:20px 10px;background:#000000cc;transition:.3s;z-index:999;
+}
+nav.active{right:0;}
+nav a{color:#fff;text-decoration:none;padding:10px;border-radius:20px;background:#ffffff22;width:100%;text-align:center;}
+.container{
+    width:100%;max-width:900px;margin:100px auto 20px auto;
+    background:#ffffff15;backdrop-filter:blur(8px);
+    border-radius:16px;padding:20px;
+}
+h2{text-align:center;}
+textarea{
+    width:100%;min-height:260px;padding:15px;border-radius:12px;
+    border:none;font-size:1rem;resize:vertical;outline:none;
+}
+.tools, .actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.tools input{flex:1;padding:8px;border-radius:8px;border:none;}
+button{padding:10px;border:none;border-radius:8px;cursor:pointer;background:#fff;color:#333;}
+.stats{display:flex;justify-content:space-between;margin-top:8px;font-size:.9rem;}
+footer{position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:12px;background:#000000aa;}
+footer a{color:#fff;text-decoration:none;}
+.popup{position:fixed;inset:0;background:#000000aa;display:none;align-items:center;justify-content:center;z-index:10000;}
+.popup-content{background:#fff;color:#333;padding:20px;border-radius:14px;text-align:center;max-width:300px;}
+@media(max-width:768px){.container{margin:120px 0 20px 0;}.tools,.actions{flex-direction:column;}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">MaxMentor</div>
+<button id="menuButton">☰ Menu</button>
+</header>
+<nav id="sidebar">
+<a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+<a href="#" onclick="openPopup();return false;">☕ Buy Me Coffee</a>
+</nav>
+<div class="container">
+<h2>📝 Advanced Note Pad</h2>
+<input type="file" id="fileInput" accept=".txt,.m3u" /><br><br>
+<textarea id="note" placeholder="Open or write your content here..."></textarea>
+<div class="tools">
+<input type="text" id="search" placeholder="Search word">
+<input type="text" id="replace" placeholder="Replace with">
+<button onclick="replaceText()">Replace</button>
+</div>
+<div class="stats">
+<span id="words">Words: 0</span>
+<span id="chars">Characters: 0</span>
+</div>
+<div class="actions">
+<button onclick="downloadFile()">⬇ Download</button>
+<button onclick="clearNote()">🗑 Clear</button>
+</div>
+</div>
+<footer>© 2025–Present <a href="#">MaxMentor</a></footer>
+<div class="popup" id="popup"><div class="popup-content"><h3>Support MaxMentor ☕</h3><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg">
+<br><button onclick="closePopup()">Close</button></div></div>
+<script>
+menuButton.onclick=()=>sidebar.classList.toggle('active');
+function openPopup(){popup.style.display='flex'}
+function closePopup(){popup.style.display='none'}
+const note=document.getElementById('note');
+const words=document.getElementById('words');
+const chars=document.getElementById('chars');
+note.addEventListener('input',updateCount);
+function updateCount(){
+ const t=note.value.trim();
+ words.textContent='Words: '+(t?t.split(/\s+/).length:0);
+ chars.textContent='Characters: '+note.value.length;
+}
+document.getElementById('fileInput').addEventListener('change',e=>{
+ const file=e.target.files[0];
+ if(!file) return;
+ const r=new FileReader();
+ r.onload=()=>{note.value=r.result;updateCount();}
+ r.readAsText(file);
+});
+function replaceText(){
+ const s=document.getElementById('search').value;
+ const r=document.getElementById('replace').value;
+ if(!s) return alert('Search word missing');
+ note.value=note.value.split(s).join(r);
+ updateCount();
+}
+function downloadFile(){
+ if(!note.value.trim()) return alert('Empty file');
+ const blob=new Blob([note.value],{type:'text/plain'});
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download='edited_file.txt';
+ a.click();
+}
+function clearNote(){ if(confirm('Clear all?')){note.value='';updateCount();} }
+</script>
+</body>
+</html>

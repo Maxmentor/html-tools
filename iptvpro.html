@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MaxMentor M3U Player</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+<style>
+*{box-sizing:border-box;}
+body{margin:4;font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,#1d2671,#c33764);color:#fff;padding-bottom:70px;}
+header{position:fixed;top:0;left:0;width:100%;height:60px;display:flex;justify-content:space-between;align-items:center;padding:0 20px;background:#000000aa;z-index:1000;border-bottom:1px solid #444;}
+.logo{font-size:1.5rem;font-weight:bold;}
+#menuButton{width:99px;margin-top:.5rem;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;background:#fff;color:#333;text-align:center;}
+#menuButton:hover{background:#f2f2f2;transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.25);}
+#menuButton:active{transform:scale(0.96);}
+nav{position:fixed;top:60px;right:-220px;height:calc(100vh - 60px);width:220px;background:#000000cc;padding:20px;transition:.3s;z-index:999;}
+nav.active{right:0;}
+nav a{display:block;margin-bottom:15px;padding:10px;border-radius:20px;background:#ffffff22;color:#fff;text-decoration:none;text-align:center;}
+.container{max-width:900px;margin:100px auto 20px auto;background:#ffffff15;backdrop-filter:blur(8px);border-radius:16px;padding:20px;display:flex;gap:20px;}
+.leftPanel{flex:1;display:flex;flex-direction:column;}
+.rightPanel{flex:2;display:flex;flex-direction:column;align-items:center;width:100%;height:550px;}
+input,select,button{padding:10px;border-radius:8px;border:none;font-size:1rem;margin-bottom:10px;}
+button{background:#fff;color:#333;cursor:pointer;margin-right:5px;margin-bottom:5px;}
+video{width:100%;max-width:100%;border-radius:12px;background:#000;margin-bottom:10px;}
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px;}
+#channelList{flex:1;background:#00000055;border-radius:12px;padding:10px;width:60%;height:500px;overflow-y: scroll;}
+#searchSection{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;width:60%;}
+footer{position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:12px;background:#000000aa;}
+footer a{color:#fff;text-decoration:none;}
+.popup{position:fixed;inset:0;background:#000000aa;display:none;align-items:center;justify-content:center;z-index:10000;}
+.popup-content{background:#fff;color:#333;padding:20px;border-radius:12px;text-align:center;width:90%;max-width:500px;}
+.popup-content img{width:200px;margin:10px 0;}
+.floatingBtn2{position:fixed;bottom:80px;right:20px;background:#fff;color:#333;border:none;border-radius:50%;width:50px;height:50px;font-size:24px;cursor:pointer;z-index:9999;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.3); z-index:4;}
+
+.floatingBtn{position:fixed;bottom:80px;right:20px;background:#fff;color:#333;border:none;border-radius:50%;width:50px;height:50px;font-size:24px;cursor:pointer;z-index:9999;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.3); z-index:4;}
+#popupChannelList{max-height:600px;overflow-y:auto;margin-top:10px;text-align:left;}
+#popupSearch{width:100%;margin-bottom:10px;padding:8px;border-radius:6px;border:1px solid #ccc;}
+@media(max-width:640px){
+  .container{flex-direction:column;}
+  .leftPanel{width:100%;}
+  .rightPanel{display:none;}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">MaxMentor</div>
+<button id="menuButton">☰ Menu</button>
+</header>
+
+<nav id="sidebar">
+<a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+<a href="#" onclick="openPopupBuy();return false;">☕ Buy Me Coffee</a>
+</nav>
+
+<div class="container">
+<div class="leftPanel">
+  <input id="m3uURL" placeholder="Paste .m3u or .m3u8 URL here">
+    <input type="file" id="fileInput" accept=".m3u,.m3u8">
+  <button onclick="loadM3U()">Load URL</button>
+<br>
+
+   <video id="video" controls autoplay playsinline></video>
+  <div class="controls">
+    <button onclick="playStream()">▶ Play</button>
+    <button onclick="stopChannel()">⏹ Stop</button>
+    <button onclick="toggleFull()">⛶ Fullscreen</button>
+    <select id="quality"><option value="">Quality</option></select>
+    <select id="audio"><option value="">Audio Track</option></select>
+    <select onchange="setSpeed(this.value)">
+      <option value="1">1x</option>
+      <option value="0.5">0.5x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+    </select>
+  </div>
+</div>
+</div>
+<div class="rightPanel">
+  <div id="searchSection">
+    <input id="searchInput" placeholder="Search Channel">
+    <button onclick="filterChannels()">Search</button>
+    <select id="categorySearch" style="width:100%;"><option value="">Category</option></select>
+  </div>
+ <div id="channelList"></div>
+</div>
+
+
+
+<footer>© 2025–Present <a href="#">MaxMentor</a></footer>
+
+<!-- Floating Eye Button -->
+<button class="floatingBtn" id="popupBtn">👁️</button>
+
+<!-- Popup for channel list -->
+<div class="popup" id="popupChannel">
+<button onclick="popbtn2()" class="floatingBtn2" id="popupBtn2">✖</button>
+  <div class="popup-content">
+    <input type="text" id="popupSearch" placeholder="Search Channel" onkeyup="filterPopupChannels()">
+    <div id="popupChannelList"></div>
+  </div>
+</div>
+
+<!-- Buy me coffee popup -->
+<div class="popup" id="popupBuy">
+  <div class="popup-content">
+    <h3>Support MaxMentor ☕</h3>
+    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg" alt="UPI QR">
+    <br><button onclick="closePopupBuy()">Close</button>
+  </div>
+</div>
+
+<script>
+
+function popbtn2() {
+  var element = document.getElementById("popupChannel");
+  element.style.display = "none";
+}
+
+
+const menuButton=document.getElementById('menuButton');
+const sidebar=document.getElementById('sidebar');
+menuButton.onclick=()=>sidebar.classList.toggle('active');
+
+const video=document.getElementById('video');
+let playlist=[],hls=null,dash=null,currentIndex=0;
+
+// Buy Me Coffee popup functions
+function openPopupBuy(){document.getElementById('popupBuy').style.display='flex';}
+function closePopupBuy(){document.getElementById('popupBuy').style.display='none';}
+
+// File load
+document.getElementById('fileInput').onchange=e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>parseM3U(r.result);
+  r.readAsText(f);
+};
+
+// Parse M3U
+function parseM3U(text){
+  playlist=[];
+  const lines=text.split('\n');
+  let category='';
+  lines.forEach(line=>{
+    line=line.trim();
+    if(!line)return;
+    if(line.startsWith('#EXTINF')){
+      const catMatch=line.match(/group-title="([^"]+)"/);
+      category=catMatch?catMatch[1]:'';
+      const name=line.split(',')[1]||'Channel';
+      playlist.push({name,url:'',category});
+    }
+    else if(line.startsWith('http')){playlist[playlist.length-1].url=line;}
+  });
+  updateCategoryDropdown();
+  renderChannelList();
+  renderPopupChannels();
+}
+
+// Update category dropdown
+function updateCategoryDropdown(){
+  const sel=document.getElementById('categorySearch');
+  sel.innerHTML='<option value="">Category</option>';
+  [...new Set(playlist.map(c=>c.category))].forEach(cat=>{
+    sel.innerHTML+=`<option value="${cat}">${cat}</option>`;
+  });
+}
+
+// Render channel list in left panel
+function renderChannelList(){
+  const div=document.getElementById('channelList');
+  div.innerHTML='';
+  playlist.forEach((c,i)=>{
+    div.innerHTML+=`<div style="margin:4px 0;"><button style="width:100%;" onclick="playIndex(${i})">${c.name} [${c.category}]</button></div>`;
+  });
+}
+
+// Render channels in popup
+function renderPopupChannels(){
+  const div=document.getElementById('popupChannelList');
+  div.innerHTML='';
+  playlist.forEach((c,i)=>{
+    div.innerHTML+=`<div style="margin:4px 0;"><button style="width:100%;" onclick="playIndexPopup(${i})">${c.name} [${c.category}]</button></div>`;
+  });
+}
+
+// Popup channel click
+function playIndexPopup(i){
+  playIndex(i);
+  closePopupChannel();
+}
+
+// Filter channels in left panel
+function filterChannels(){
+  const cat=document.getElementById('categorySearch').value.toLowerCase();
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  const div=document.getElementById('channelList');
+  div.innerHTML='';
+  playlist.forEach((c,i)=>{
+    if((!cat||c.category.toLowerCase()===cat)&&(!search||c.name.toLowerCase().includes(search))){
+      div.innerHTML+=`<div style="margin:4px 0;"><button style="width:100%;" onclick="playIndex(${i})">${c.name} [${c.category}]</button></div>`;
+    }
+  });
+}
+
+// Filter channels in popup
+function filterPopupChannels(){
+  const search=document.getElementById('popupSearch').value.toLowerCase();
+  const div=document.getElementById('popupChannelList');
+  div.innerHTML='';
+  playlist.forEach((c,i)=>{
+    if(!search||c.name.toLowerCase().includes(search)){
+      div.innerHTML+=`<div style="margin:4px 0;"><button style="width:100%;" onclick="playIndexPopup(${i})">${c.name} [${c.category}]</button></div>`;
+    }
+  });
+}
+
+// Load M3U from URL
+function loadM3U(){
+  const url=document.getElementById('m3uURL').value.trim();
+  if(!url)return;
+  fetch(url).then(r=>r.text()).then(parseM3U).catch(e=>alert('Failed to load M3U'));
+}
+
+// Player functions
+function playIndex(i){
+  currentIndex=i;
+  const url=playlist[i].url;
+  stopChannel();
+  if(url.endsWith('.m3u8')){
+    hls=new Hls({lowLatencyMode:true,enableWorker:true});
+    hls.loadSource(url); hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      const q=document.getElementById('quality');
+      q.innerHTML='<option value="">Quality</option>';
+      hls.levels.forEach((l,i)=>q.innerHTML+=`<option value="${i}">${l.height}p</option>`);
+      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED,()=>{
+        const a=document.getElementById('audio');
+        a.innerHTML='<option value="">Audio Track</option>';
+        hls.audioTracks.forEach((at,i)=>a.innerHTML+=`<option value="${i}">${at.name}</option>`);
+      });
+    });
+  } else if(url.endsWith('.mpd')){
+    dash=dashjs.MediaPlayer().create();
+    dash.initialize(video,url,true);
+  } else { video.src=url; }
+}
+
+function playStream(){if(currentIndex>=0)playIndex(currentIndex);}
+function stopChannel(){if(hls){hls.destroy();hls=null;} if(dash){dash.reset();dash=null;} video.pause();video.removeAttribute('src');video.load();}
+function toggleFull(){if(video.requestFullscreen)video.requestFullscreen();}
+function setSpeed(v){video.playbackRate=v;}
+function setQuality(){if(hls)hls.currentLevel=document.getElementById('quality').value;}
+function setAudio(){if(hls)hls.audioTrack=document.getElementById('audio').value;}
+
+// Popup toggle
+const popupBtn=document.getElementById('popupBtn');
+const popupChannel=document.getElementById('popupChannel');
+popupBtn.onclick=()=>{
+  if(popupChannel.style.display==='flex'){popupChannel.style.display='none'; popupBtn.textContent='👁️';}
+  else{popupChannel.style.display='flex'; popupBtn.textContent='👁';}
+};
+function closePopupChannel(){popupChannel.style.display='none'; popupBtn.textContent='👁️';}
+</script>
+</body>
+</html>

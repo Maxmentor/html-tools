@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MaxMentor M3U Playlist Creator</title>
+<style>
+*{box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    margin:4; padding-bottom:60px;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    color:#fff; overflow-x:hidden;
+}
+/* HEADER */
+header{
+    position:fixed;top:0;left:0;width:100%;height:60px;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 20px;background:#000000aa;z-index:1000;
+}
+header .logo{font-size:1.5rem;font-weight:bold;}
+#menuButton{
+    background:#fff;color:#333;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;
+}
+/* SIDEBAR */
+nav{
+    position:fixed;
+    top:60px; /* header ke neeche se start */
+    right:-220px;
+    height:calc(100vh - 60px); /* full height minus header */
+    width:220px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start; /* vertical alignment start se */
+    align-items:center;
+    gap:20px;
+    padding:20px 10px;
+    background:#000000cc;
+    transition:.3s;
+    z-index:999;
+}
+nav.active{
+    right:0;
+}
+nav a{
+    color:#fff;
+    text-decoration:none;
+    padding:10px;
+    border-radius:20px;
+    background:#ffffff22;
+    width:100%;
+    text-align:center;
+}
+nav a:hover{background:#ffffff44;}
+/* MAIN */
+.container{
+    width:100%; max-width:900px; margin:100px auto 20px auto;
+    background:#ffffff15; backdrop-filter:blur(8px);
+    border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+h2{text-align:center;margin-bottom:20px;}
+form input, form select{
+    width:100%; padding:10px; margin:8px 0; border-radius:8px; border:none; font-size:1rem;
+}
+button.addBtn, button.downloadBtn{
+    width:100%; padding:12px; border:none; border-radius:8px; margin-top:10px; cursor:pointer;
+    background:#fff; color:#333;
+}
+button.addBtn:hover, button.downloadBtn:hover{background:#f0f0f0;}
+.playlist-list{
+    margin-top:10px; max-height:300px; overflow-y:auto; background:#00000040; border-radius:10px; padding:10px;
+}
+.playlist-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:6px 8px; border-bottom:1px solid #fff3;
+}
+.playlist-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.playlist-item button{background:#ff4d4d;color:#fff;padding:2px 6px;border:none;border-radius:6px;cursor:pointer;}
+.playlist-item button:hover{background:#ff0000;}
+/* FOOTER */
+footer{
+    position:fixed; bottom:0; left:0; width:100%; text-align:center; padding:12px; background:#000000aa;
+}
+footer a{color:#fff;text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+/* POPUP */
+.popup{
+    position:fixed; inset:0; background:#000000aa;
+    display:none; align-items:center; justify-content:center; z-index:10000;
+}
+.popup-content{
+    background:#fff; color:#333; padding:20px;
+    border-radius:14px; text-align:center; max-width:300px;
+}
+.popup-content img{width:200px; margin:10px 0;}
+@media(max-width:768px){
+    .container{margin:120px 0px 20px 0px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">MaxMentor</div>
+    <button id="menuButton">☰ Menu</button>
+</header>
+
+<nav id="sidebar">
+    <a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+    <a href="#" onclick="openPopup(); return false;">☕ Buy Me Coffee</a>
+</nav>
+
+<div class="container">
+<h2>M3U Playlist Creator</h2>
+<form id="playlistForm">
+    <input type="text" id="channelName" placeholder="Channel Name" required>
+    <input type="text" id="logoUrl" placeholder="Logo URL" required>
+    <input type="text" id="category" placeholder="Category" required>
+    <input type="url" id="streamLink" placeholder="Stream Link" required>
+    <button type="submit" class="addBtn">Add Channel</button>
+</form>
+
+<!-- Download button above the list -->
+<button class="downloadBtn" onclick="downloadPlaylist()">Download Playlist</button>
+
+<div class="playlist-list" id="playlistList"></div>
+</div>
+
+<footer>
+© 2025–Present <a href="#">MaxMentor</a>
+</footer>
+
+<div class="popup" id="popup">
+<div class="popup-content">
+<h3>Support MaxMentor ☕</h3>
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg" alt="UPI QR">
+<br>
+<button onclick="closePopup()">Close</button>
+</div>
+</div>
+
+<script>
+// Sidebar toggle
+const menuBtn=document.getElementById('menuButton'),
+      sidebar=document.getElementById('sidebar');
+menuBtn.addEventListener('click',()=>sidebar.classList.toggle('active'));
+
+// Popup
+function openPopup(){ document.getElementById('popup').style.display='flex'; }
+function closePopup(){ document.getElementById('popup').style.display='none'; }
+
+// Playlist logic
+let playlist=[];
+const form=document.getElementById('playlistForm');
+const listDiv=document.getElementById('playlistList');
+
+form.addEventListener('submit',function(e){
+    e.preventDefault();
+    const name=document.getElementById('channelName').value.trim();
+    const logo=document.getElementById('logoUrl').value.trim();
+    const cat=document.getElementById('category').value.trim();
+    const link=document.getElementById('streamLink').value.trim();
+    if(!name||!logo||!cat||!link) return alert('All fields are required');
+
+    const entry={name,logo,cat,link};
+    playlist.unshift(entry); // latest on top
+    renderList();
+    form.reset();
+});
+
+function renderList(){
+    listDiv.innerHTML='';
+    playlist.forEach((ch,index)=>{
+        const div=document.createElement('div');
+        div.className='playlist-item';
+        // Format: Channel Name | Group Name
+        div.innerHTML=`<span>${ch.name} | ${ch.cat}</span>
+                       <button onclick="deleteChannel(${index})">Delete</button>`;
+        listDiv.appendChild(div);
+    });
+}
+
+function deleteChannel(index){
+    playlist.splice(index,1);
+    renderList();
+}
+
+function downloadPlaylist(){
+    if(!playlist.length) return alert('No channels added');
+    let content='#EXTM3U\n';
+    const epgPreset='http://example.com/epg.xml';
+    playlist.forEach(ch=>{
+        content+=`#EXTINF:-1 tvg-id="${ch.name}" tvg-name="${ch.name}" tvg-logo="${ch.logo}" group-title="${ch.cat}",${ch.name}\n${ch.link}\n`;
+    });
+    const blob=new Blob([content],{type:'text/plain'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='playlist.m3u';
+    a.click();
+}
+</script>
+
+</body>
+</html>

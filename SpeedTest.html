@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MaxMentor Typing Speed Test</title>
+<style>
+*{box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    margin:4;
+    color:#fff;
+    padding-bottom:60px; /* footer ke liye */
+    overflow-x:hidden; /* horizontal scroll fix */
+}
+
+/* ===== HEADER ===== */
+header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    background:#000000aa;
+    z-index:1000;
+}
+header .logo{
+    font-size:1.5rem;
+    font-weight:bold;
+}
+#menuButton{
+    background:#fff;
+    color:#333;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+/* ===== SIDEBAR ===== */
+nav{
+    position:fixed;
+    top:60px; /* header ke neeche se start */
+    right:-220px; /* hidden by default */
+    height:calc(100vh - 60px);
+    width:220px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:20px;
+    padding:20px 10px;
+    background:#000000cc;
+    backdrop-filter:blur(8px);
+    z-index:999;
+    transition: right 0.3s ease;
+}
+nav.active{ right:0; }
+nav .links{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    width:100%;
+}
+nav a{
+    color:#fff;
+    text-decoration:none;
+    text-align:center;
+    padding:10px;
+    border-radius:20px;
+    background:#ffffff22;
+    transition:.3s;
+}
+nav a:hover{ background:#ffffff44; }
+
+/* ===== MAIN ===== */
+.container{
+    width:100%;
+    max-width:1200px;
+    margin:100px auto 20px auto; /* header ke liye top margin */
+    background:#ffffff15; 
+    backdrop-filter:blur(8px);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+h1{text-align:center; margin-bottom:15px}
+
+.modes{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+}
+button.primary{
+    background:#fff;
+    color:#333;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:1rem;
+    padding:10px 20px;
+    transition:.3s;
+}
+button.primary:hover{background:#f0f0f0;}
+button.secondary{
+    background:#b59b00;
+    color:#222;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:1rem;
+    padding:10px 20px;
+    transition:.3s;
+    margin-top:.5rem;
+}
+button.secondary:hover{background:#d4aa00;}
+
+.info{
+    display:flex; justify-content:space-between;
+    margin:12px 0; flex-wrap:wrap;
+}
+
+.paragraph{
+    background:#00000040; padding:15px;
+    border-radius:10px;
+    min-height:180px;
+    max-height:220px;
+    overflow-y:auto;
+    line-height:1.6;
+}
+.paragraph span.correct{color:#00ff99;}
+.paragraph span.wrong{color:#ff4d4d;}
+
+textarea{
+    width:100%; height:140px;
+    margin-top:15px;
+    border-radius:10px; border:none; padding:15px;
+    font-size:1rem; resize:none; outline:none;
+}
+
+.result{
+    margin-top:15px;
+    padding:15px;
+    background:#00ffcc20;
+    border-radius:10px;
+    display:none;
+}
+
+.custom{
+    margin-top:20px;
+    padding:15px;
+    background:#ffffff18;
+    border-radius:10px;
+}
+
+/* ===== FOOTER ===== */
+footer{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    text-align:center;
+    padding:12px;
+    background:#000000aa;
+    z-index:1000;
+}
+footer a{color:#fff; text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+
+/* ===== POPUP ===== */
+.popup{
+    position:fixed; inset:0; background:#000000aa;
+    display:none; align-items:center; justify-content:center;
+}
+.popup-content{
+    background:#fff; color:#333; padding:20px;
+    border-radius:14px; text-align:center; max-width:300px
+}
+.popup-content img{width:200px; margin:10px 0}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+    .container{margin:120px 0px 20px 0px;}
+    #menuButton{padding:8px 12px;}
+    nav{width:200px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo">MaxMentor</div>
+    <button id="menuButton">☰ Menu</button>
+</header>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+    <div class="links">
+        <a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+        <a href="#" onclick="openPopup()">☕ Buy Me Coffee</a>
+    </div>
+</nav>
+
+<!-- MAIN CONTAINER -->
+<div class="container">
+<h1>Typing Speed Test</h1>
+
+<div class="modes">
+    <button class="primary" onclick="setMode('normal')">Normal</button>
+    <button class="primary" onclick="setMode('medium')">Medium</button>
+    <button class="primary" onclick="setMode('hard')">Hard</button>
+</div>
+
+<div class="info">
+    <div>⏱ Time: <span id="time">0</span> sec</div>
+    <div>Mode: <span id="mode">None</span></div>
+</div>
+
+<div class="paragraph" id="paragraph">Select a mode or add custom paragraph…</div>
+<textarea id="input" placeholder="Start typing here..."></textarea>
+<div class="result" id="result"></div>
+
+<div class="custom">
+<h3>Custom Paragraph</h3>
+<textarea id="customText" placeholder="Write your own paragraph here..."></textarea>
+<button class="secondary" onclick="setCustom()">Start Custom Test</button>
+</div>
+</div>
+
+<footer>
+© 2025–Present <a href="#">MaxMentor</a>
+</footer>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+<div class="popup-content">
+<h3>Support MaxMentor ☕</h3>
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg" alt="UPI QR">
+<br>
+<button onclick="closePopup()">Close</button>
+</div>
+</div>
+
+<script>
+/* Sidebar toggle */
+const menuButton=document.getElementById('menuButton');
+const sidebar=document.getElementById('sidebar');
+menuButton.addEventListener('click',()=>{ sidebar.classList.toggle('active'); });
+
+/* Typing Test JS */
+let timer=0, interval, started=false;
+let words=[];
+
+const texts={
+normal:`On a windy winter morning, a woman looked out of the window.The only thing she saw, a garden. A smile spread across her face as she spotted Maria, her daughter, in the middle of the garden enjoying the weather. It started drizzling. Maria started dancing joyfully.She tried to wave to her daughter, but her elbow was stuck, her arm hurt, her smile turned upside down. Reality came crashing down as the drizzle turned into a storm. Maria's murdered corpse consumed her mind.On a windy winter morning, a woman looked out of the window of her jail cell.`,
+medium:`In a quiet town surrounded by dusty roads and old banyan trees, lived a young boy named Aarav. He was not the smartest student in his class, nor the strongest on the playground, but he had one quality that quietly shaped his future—he never stopped trying. While others chased quick success, Aarav believed in taking small steps every day.
+
+Every morning before school, Aarav woke up early to help his mother prepare breakfast. His father worked as a mechanic, and money was often tight. Despite these challenges, Aarav carried a notebook everywhere. In it, he wrote down new words, ideas, and small goals for himself. His teacher once asked him why he worked so hard when results came slowly. Aarav simply smiled and said, “Because slow steps still move forward.”
+
+At school, Aarav struggled with English. Reading long paragraphs felt tiring, and writing essays took him much longer than his classmates. Many students laughed when he read aloud, but he never stopped raising his hand. Every mistake became a lesson rather than a reason to quit. After school, instead of playing games, Aarav practiced reading newspapers and short stories. He read about the country, science, and people who changed the world through patience and effort.
+
+One day, the school announced a storytelling competition. Aarav wanted to participate, but fear held him back. He remembered all the times he had been laughed at. That night, his mother noticed his silence and asked what was wrong. After listening carefully, she said, “You don’t need to be perfect. You only need to be honest.” Those words stayed with Aarav.
+
+He decided to write a story about his town, its people, and the beauty hidden in ordinary lives. He wrote slowly, correcting mistakes, rewriting sentences, and learning new words along the way. It took him many nights, but he did not give up. On the day of the competition, his hands trembled, yet his voice remained steady as he spoke from the heart.
+
+The hall was silent when he finished. Then came applause—soft at first, then louder. Aarav did not win first prize, but he received a special mention for effort and originality. More importantly, he gained confidence. For the first time, he believed in his own journey.
+
+Years later, Aarav became a teacher. He often told his students that success is not built in one day. It is created by daily effort, patience, and courage. His story reminded everyone that small steps, taken consistently, can lead to powerful change.`,
+hard:`The town of Shantipur was not marked on most maps. It had narrow streets, crowded markets, and houses built close to one another as if they were sharing secrets. Life there moved slowly, but for many people, the struggle was constant. Among them lived Rohan, a young man with ordinary dreams and an uncommon determination to change his life.
+
+Rohan grew up watching his parents work tirelessly. His father ran a small stationery shop, and his mother stitched clothes for neighbors. Their income was enough to survive, but not enough to dream big. From an early age, Rohan understood the value of effort. He learned that success did not come from luck but from patience and discipline.
+
+As a student, Rohan was average. He was not known for topping exams or winning competitions, but he was curious. He asked questions, read newspapers daily, and listened carefully when elders spoke about life. While his friends spent evenings playing games or scrolling on their phones, Rohan often sat on the terrace reading books borrowed from the local library. He believed knowledge was the road that could take him beyond the boundaries of his town.
+
+After finishing school, Rohan faced reality. College fees were high, and his family could not afford a private institution. He enrolled in a government college and worked part-time at his father’s shop. The days were long and exhausting. There were moments when he doubted his path, especially when he saw others moving ahead faster. Still, he reminded himself that progress was not a race.
+
+One summer, the town announced a road construction project that would connect Shantipur to a nearby city. Many people saw it as just another government plan, but Rohan saw opportunity. He volunteered to help the local office with paperwork and coordination. Though unpaid, the experience taught him valuable skills. He learned how systems worked, how decisions were made, and how patience mattered more than complaints.
+
+During this time, Rohan met people from different backgrounds—engineers, officers, laborers, and contractors. He listened more than he spoke. Slowly, his confidence grew. He realized that success was not limited to those born in big cities or wealthy families. It belonged to those who prepared themselves quietly.
+
+When the road was finally completed, Shantipur began to change. Businesses grew, students traveled for education, and job opportunities increased. Rohan applied for a clerical job in the city using the skills he had gained. After several attempts and rejections, he was finally selected. It was not a high-paying job, but it was a beginning.
+
+Life in the city was challenging. The pace was fast, competition was tough, and expectations were high. Rohan struggled at first. He made mistakes, missed deadlines, and felt overwhelmed. However, he did not give up. Every evening, he reviewed his work, learned from errors, and improved slowly. His supervisors noticed his sincerity and dedication.
+
+Over time, Rohan earned promotions and respect. He used his income to support his family and improve their living conditions. More importantly, he became a source of inspiration in his town. Young students visited him for guidance, and he always shared one lesson: “No road changes life unless you walk it with effort.”
+
+Years later, when Rohan returned to Shantipur, he stood on the same road that once connected the town to opportunity. He realized that the road had not only changed the town but had also transformed him. It taught him that growth comes from persistence, learning, and the courage to move forward even when the path is uncertain.
+
+Rohan’s story spread quietly, just like his journey. It reminded people that success does not always arrive loudly. Sometimes, it comes step by step, on a road built with patience, honesty, and hard work.`
+};
+
+function setMode(mode){ loadText(texts[mode],mode); }
+function setCustom(){
+    const txt=document.getElementById('customText').value.trim();
+    if(!txt) return alert('Enter custom paragraph');
+    loadText(txt,'Custom');
+}
+function loadText(text,mode){
+    clearInterval(interval); timer=0; started=false;
+    document.getElementById('time').innerText=0;
+    document.getElementById('mode').innerText=mode;
+    document.getElementById('input').value='';
+    document.getElementById('result').style.display='none';
+    words=text.split(' ');
+    render([]); 
+    started=false; // reset started
+}
+function render(typed){
+    const para=document.getElementById('paragraph');
+    para.innerHTML=words.map((w,i)=>{
+        if(typed[i]==null) return `<span>${w}</span>`;
+        if(typed[i]===w) return `<span class='correct'>${w}</span>`;
+        return `<span class='wrong'>${w}</span>`;
+    }).join(' ');
+}
+
+/* Prevent paste */
+const input=document.getElementById('input');
+input.addEventListener('paste',e=>e.preventDefault());
+document.getElementById('customText').addEventListener('paste',e=>e.preventDefault());
+
+/* Typing input */
+input.addEventListener('input',()=>{
+    if(words.length===0) return;
+
+    // Start timer on first character typed
+    if(!started && input.value.trim().length>0){
+        started=true;
+        interval=setInterval(()=>{timer++; time.innerText=timer},1000);
+    }
+
+    const typed=input.value.trim().split(/\s+/);
+    render(typed);
+
+    // Only show result if full paragraph typed
+    if(typed.length>=words.length && typed.join(' ')===words.join(' ')){
+        clearInterval(interval);
+        const wpm=Math.round((typed.length/timer)*60);
+        result.style.display='block';
+        result.innerHTML=`Time: ${timer}s<br>Words: ${typed.length}<br>Speed: ${wpm} WPM`;
+    }
+});
+
+/* Popup */
+function openPopup(){popup.style.display='flex';}
+function closePopup(){popup.style.display='none';}
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MaxMentor Key Generator</title>
+<style>
+*{box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    margin:4; padding-bottom:60px;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    color:#fff; overflow-x:hidden;
+}
+/* HEADER */
+header{
+    position:fixed;top:0;left:0;width:100%;height:60px;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 20px;background:#000000aa;z-index:1000;
+}
+header .logo{font-size:1.5rem;font-weight:bold;}
+#menuButton{
+    background:#fff;color:#333;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;margin-top:-.2rem;
+	width:100px;
+}
+/* SIDEBAR */
+nav{
+    position:fixed;
+    top:60px;
+    right:-220px;
+    height:calc(100vh - 60px);
+    width:220px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+    padding:20px 10px;
+    background:#000000cc;
+    transition:.3s;
+    z-index:999;
+}
+nav.active{right:0;}
+nav a{
+    color:#fff;
+    text-decoration:none;
+    padding:10px;
+    border-radius:20px;
+    background:#ffffff22;
+    width:100%;
+    text-align:center;
+}
+nav a:hover{background:#ffffff44;}
+
+/* MAIN */
+.container{
+    width:100%;
+    max-width:900px;
+    margin:100px auto 20px auto;
+    background:#ffffff15;
+    backdrop-filter:blur(8px);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+h2{text-align:center;margin-bottom:20px;}
+
+.options{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:15px;
+}
+.options label{
+    background:#00000040;
+    padding:8px 12px;
+    border-radius:20px;
+    cursor:pointer;
+}
+.options input{margin-right:6px;}
+
+
+input[type="number"]{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    font-size:1rem;
+    margin-bottom:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#fff;
+    color:#333;
+    margin-top:10px;
+    font-size:1rem;
+}
+button:hover{background:#f0f0f0;}
+
+.keys{
+    margin-top:15px;
+    background:#00000040;
+    padding:15px;
+    border-radius:10px;
+    max-height:260px;
+    overflow-y:auto;
+}
+.key-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 0;
+    border-bottom:1px solid #ffffff22;
+}
+.key-item span{
+    word-break:break-all;
+}
+.key-item button{
+    padding:4px 8px;
+    background:#00ffcc;
+    color:#000;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* FOOTER */
+footer{
+    position:fixed; bottom:0; left:0;
+    width:100%;
+    text-align:center;
+    padding:12px;
+    background:#000000aa;
+}
+footer a{color:#fff;text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+
+/* POPUP */
+.popup{
+    position:fixed; inset:0;
+    background:#000000aa;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:10000;
+}
+.popup-content{
+    background:#fff;
+    color:#333;
+    padding:20px;
+    border-radius:14px;
+    text-align:center;
+    max-width:300px;
+}
+.popup-content img{width:200px;margin:10px 0;}
+
+@media(max-width:768px){
+    .container{margin:120px 0px 20px 0px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">MaxMentor</div>
+    <button id="menuButton">☰ Menu</button>
+</header>
+
+<nav id="sidebar">
+    <a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+    <a href="#" onclick="openPopup();return false;">☕ Buy Me Coffee</a>
+</nav>
+
+<!-- MAIN TOOL -->
+<div class="container">
+<h2>Secure Key Generator</h2>
+
+<input type="number" id="keyLength" placeholder="Key Length (e.g. 32)" value="32" min="4" max="256">
+
+<div class="options">
+<label><input type="checkbox" id="upper" checked> Uppercase</label>
+<label><input type="checkbox" id="lower" checked> Lowercase</label>
+<label><input type="checkbox" id="numbers" checked> Numbers</label>
+<label><input type="checkbox" id="symbols"> Symbols</label>
+</div>
+
+<button onclick="generateKeys()">Generate Keys</button>
+<button onclick="copyAll()">Copy All</button>
+
+<div class="keys" id="keyBox"></div>
+</div>
+
+<footer>
+© 2025–Present <a href="#">MaxMentor</a>
+</footer>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+<div class="popup-content">
+<h3>Support MaxMentor ☕</h3>
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg">
+<br>
+<button onclick="closePopup()">Close</button>
+</div>
+</div>
+
+<script>
+// Sidebar toggle
+menuButton.onclick=()=>sidebar.classList.toggle('active');
+
+// Popup
+function openPopup(){popup.style.display='flex'}
+function closePopup(){popup.style.display='none'}
+
+function generateKeys(){
+    const len=parseInt(keyLength.value);
+    let chars='';
+    if(upper.checked) chars+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if(lower.checked) chars+='abcdefghijklmnopqrstuvwxyz';
+    if(numbers.checked) chars+='0123456789';
+    if(symbols.checked) chars+='!@#$%^&*()_+-={}[]<>?';
+    if(!chars) return alert('Select at least one option');
+
+    let out='';
+    keyBox.innerHTML='';
+    for(let k=0;k<5;k++){
+        let key='';
+        for(let i=0;i<len;i++){
+            key+=chars.charAt(Math.floor(Math.random()*chars.length));
+        }
+        const div=document.createElement('div');
+        div.className='key-item';
+        div.innerHTML=`<span>${key}</span><button onclick="copyOne('${key}')">Copy</button>`;
+        keyBox.appendChild(div);
+    }
+}
+
+function copyOne(t){
+    navigator.clipboard.writeText(t);
+    alert('Key Copied');
+}
+function copyAll(){
+    let all=[...document.querySelectorAll('.key-item span')].map(s=>s.innerText).join('\n');
+    if(!all) return;
+    navigator.clipboard.writeText(all);
+    alert('All Keys Copied');
+}
+</script>
+
+</body>
+</html>

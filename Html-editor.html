@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MaxMentor HTML PHP Editor</title>
+<style>
+*{box-sizing:border-box;}
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    margin:3;color:#fff;
+    padding-bottom:60px;overflow-x:hidden;
+}
+header{
+    position:fixed;top:0;left:0;width:100%;height:60px;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 20px;background:#000000aa;z-index:1000;
+}
+header .logo{font-size:1.5rem;font-weight:bold;}
+#menuButton{background:#fff;color:#333;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;}
+nav{
+    position:fixed;top:60px;right:-220px;height:calc(100vh - 60px);width:220px;
+    background:#000000cc;padding:20px 10px;transition:.3s;z-index:999;
+}
+nav.active{right:0;}
+nav a{
+    display:block;color:#fff;text-decoration:none;
+    margin-bottom:15px;padding:10px;border-radius:20px;
+    background:#ffffff22;text-align:center;
+}
+.container{
+    width:94%;max-width:900px;
+    margin:100px auto 20px auto;
+    background:#ffffff15;border-radius:16px;padding:20px;
+}
+h1{text-align:center;margin-bottom:15px;}
+textarea{
+    width:100%;min-height:240px;
+    padding:14px;border-radius:12px;
+    border:none;font-size:1rem;resize:vertical;outline:none;
+}
+.components{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.components button{
+    padding:8px 12px;border:none;border-radius:8px;
+    background:#fff;color:#333;cursor:pointer;
+}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.actions button{
+    padding:10px;border:none;border-radius:8px;
+    background:#fff;color:#333;cursor:pointer;
+}
+.preview-box iframe{
+    width:100%;height:660px;border:none;border-radius:12px;background:#fff;
+}
+footer{
+    position:fixed;bottom:0;left:0;width:100%;
+    text-align:center;padding:12px;background:#000000aa;
+}
+footer a{color:#fff;text-decoration:none;}
+@media(max-width:768px){
+    .container{margin:120px 10px 20px 10px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">MaxMentor</div>
+<button id="menuButton">☰ Menu</button>
+</header>
+
+<nav id="sidebar">
+<a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+</nav>
+
+<div class="container">
+<h1>HTML / PHP Editor</h1>
+
+<div class="components">
+<button onclick="loadHTML()">Basic HTML</button>
+<button onclick="loadPHP()">Basic PHP</button>
+<button onclick="addCode('<h1>Heading</h1>')">Heading</button>
+<button onclick="addCode('<p>Paragraph</p>')">Paragraph</button>
+<button onclick="addCode('<button>Button</button>')">Button</button>
+<button onclick="addCode(loginForm)">Login Form</button>
+<button onclick="addCode(registerForm)">Register Form</button>
+<button onclick="addCode(linkBasic)">Link</button>
+<button onclick="addCode(linkNewTab)">New Tab Link</button>
+<button onclick="addCode('<label>Hello Lable</label>')">Lable</button>
+<button onclick="addCode('<input />')">Text Box</button>
+<button onclick="addCode('<table border=1><tr><th>A</th><th>B</th></tr></table>')">Table</button>
+<button onclick="loadoptions()">Options</button>
+
+
+<button onclick="addCode('<br>')">Break Line</button>
+<button onclick="addCode('<hr>')">Horizontal Line</button>
+</div>
+
+
+
+<textarea id="editor" placeholder="Write HTML / PHP code here..."></textarea>
+
+<div class="actions">
+<button onclick="preview()">Preview</button>
+<button onclick="download()">Download</button>
+<button onclick="clearEditor()">Clear</button>
+</div>
+<br><br>
+<div class="preview-box" id="previewBox" style="display:none">
+<iframe id="previewFrame"></iframe>
+</div>
+</div>
+
+<footer>© 2025–Present <a href="#">MaxMentor</a></footer>
+
+<script>
+menuButton.onclick=()=>sidebar.classList.toggle('active');
+
+const editor=document.getElementById('editor');
+const previewFrame=document.getElementById('previewFrame');
+const previewBox=document.getElementById('previewBox');
+
+/* COMPONENT DATA */
+const loginForm=`<form>
+<h2>Login</h2>
+<input type="email" placeholder="Email"><br><br>
+<input type="password" placeholder="Password"><br><br>
+<button>Login</button>
+</form>`;
+
+const registerForm=`<form>
+<h2>Register</h2>
+<input placeholder="Name"><br><br>
+<input type="email" placeholder="Email"><br><br>
+<input type="password" placeholder="Password"><br><br>
+<button>Register</button>
+</form>`;
+
+const linkBasic=`<a href="https://example.com">Visit Website</a>`;
+const linkNewTab=`<a href="https://example.com" target="_blank">Open in New Tab</a>`;
+
+/* ⭐ CURSOR BASED INSERT ⭐ */
+function addCode(code){
+    editor.focus();
+    const start=editor.selectionStart;
+    const end=editor.selectionEnd;
+    const text=editor.value;
+    editor.value=text.slice(0,start)+code+text.slice(end);
+    editor.selectionStart=editor.selectionEnd=start+code.length;
+}
+
+
+
+/* TEMPLATES */
+
+
+
+
+function loadoptions(){
+editor.value=`<select>
+ <option>
+      <option>Option 1</option>
+      <option>Option 2</option>
+      <option>Option 3</option>
+      <option>Option 3</option>
+    </option>
+</select>`;
+}
+
+
+
+function loadHTML(){
+editor.value=`<!DOCTYPE html>
+<html>
+<head>
+<title>My Page</title>
+</head>
+<body>
+
+<h1>Hello World</h1>
+
+</body>
+</html>`;
+}
+
+function loadPHP(){
+editor.value=`<?php
+echo "Hello PHP";
+?>`;
+}
+
+function preview(){
+previewBox.style.display='block';
+previewFrame.srcdoc=editor.value;
+}
+
+
+
+function download(){
+if(!editor.value.trim())return alert('Empty file');
+const blob=new Blob([editor.value],{type:'text/plain'});
+const a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download='index.html';
+a.click();
+}
+
+function clearEditor(){
+if(confirm('Clear all?'))editor.value='';
+}
+</script>
+
+</body>
+</html>
