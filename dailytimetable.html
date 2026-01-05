@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Time Table</title>
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg,#4e54c8,#8f94fb);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    background:#fff;
+    width:100%;
+    max-width:900px;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    color:#333;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr auto;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+select,button{
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+button{
+    background:#4e54c8;
+    color:white;
+    cursor:pointer;
+    border:none;
+}
+
+button:hover{
+    background:#3b40a4;
+}
+
+.download-btn{
+    width:100%;
+    margin-bottom:15px;
+    background:#28a745;
+}
+
+.download-btn:hover{
+    background:#1e7e34;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+th{
+    background:#f4f6ff;
+}
+
+.remove{
+    color:red;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+@media(max-width:600px){
+    .form-row{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Daily Time Table</h1>
+
+<div class="form-row">
+    <select id="activity">
+        <option value="">Select Activity</option>
+        <option>Wakeup</option>
+        <option>Exercise</option>
+        <option>Bath & Fresh</option>
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Dinner</option>
+        <option>Math</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Bio</option>
+        <option>GS</option>
+        <option>Reasoning</option>
+        <option>Mechanical</option>
+        <option>Rest</option>
+        <option>Sleep</option>
+    </select>
+
+    <select id="fromTime"></select>
+    <select id="toTime"></select>
+
+    <button onclick="addRow()">Add</button>
+</div>
+
+<button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+
+<table>
+<thead>
+<tr>
+    <th>Activity</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Remove</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<script>
+/* -------- TIME DROPDOWN -------- */
+function generateTime(selectId){
+    let select = document.getElementById(selectId);
+    select.innerHTML = "";
+    for(let h=0; h<24; h++){
+        for(let m=0; m<60; m+=30){
+            let hour = h.toString().padStart(2,'0');
+            let min = m.toString().padStart(2,'0');
+            let time = `${hour}:${min}`;
+            let opt = document.createElement("option");
+            opt.value = time;
+            opt.text = time;
+            select.appendChild(opt);
+        }
+    }
+}
+
+generateTime("fromTime");
+generateTime("toTime");
+
+/* -------- ADD ROW -------- */
+function addRow(){
+    let activity = document.getElementById("activity").value;
+    let from = document.getElementById("fromTime").value;
+    let to = document.getElementById("toTime").value;
+
+    if(activity === "" || from === "" || to === ""){
+        alert("Please select all fields");
+        return;
+    }
+
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td>${activity}</td>
+        <td>${from}</td>
+        <td>${to}</td>
+        <td class="remove" onclick="this.parentElement.remove()">✖</td>
+    `;
+
+    document.getElementById("tableBody").appendChild(tr);
+}
+
+/* -------- PDF DOWNLOAD (STYLED) -------- */
+function downloadPDF(){
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF("p","mm","a4");
+
+    /* Header */
+    doc.setFillColor(78,84,200);
+    doc.rect(0,0,210,25,"F");
+
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20);
+    doc.setFont("helvetica","bold");
+    doc.text("DAILY TIME TABLE",105,16,{align:"center"});
+
+    /* Table Header */
+    let startY = 35;
+    doc.setFillColor(240,242,255);
+    doc.rect(10,startY,190,12,"F");
+
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(12);
+    doc.setFont("helvetica","bold");
+
+    doc.text("Activity",20,startY+8);
+    doc.text("From Time",95,startY+8);
+    doc.text("To Time",145,startY+8);
+
+    /* Table Rows */
+    doc.setFont("helvetica","normal");
+    let y = startY + 18;
+
+    let rows = document.querySelectorAll("#tableBody tr");
+
+    if(rows.length === 0){
+        alert("No data to download");
+        return;
+    }
+
+    rows.forEach((row,index)=>{
+        let cols = row.querySelectorAll("td");
+
+        if(index % 2 === 0){
+            doc.setFillColor(248,249,255);
+            doc.rect(10,y-6,190,10,"F");
+        }
+
+        doc.text(cols[0].innerText,20,y);
+        doc.text(cols[1].innerText,95,y);
+        doc.text(cols[2].innerText,145,y);
+
+        y += 10;
+
+        if(y > 280){
+            doc.addPage();
+            y = 20;
+        }
+    });
+
+    /* Footer */
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text("Generated by Time Table Planner",105,290,{align:"center"});
+
+    doc.save("TimeTable.pdf");
+}
+</script>
+
+
+</body>
+</html>
