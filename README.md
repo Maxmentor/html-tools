@@ -6,8 +6,8 @@ Ye project beginners aur developers dono ke liye helpful hai jo web tools banana
 ---
 
 ## 🌐 Live Demo
-👉 **Website Demo:**  
-https://maxtools.rf.gd/
+👉 **Tools Demo:**  
+https://maxmentor.github.io/html-tools/index.html
 
 ( GitHub Pages / Netlify / Vercel se host kiya ja sakta hai )
 
