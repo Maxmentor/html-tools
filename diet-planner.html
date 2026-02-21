@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diet Planner System</title>
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg,#11998e,#38ef7d);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    background:#fff;
+    width:100%;
+    max-width:900px;
+    border-radius:15px;
+    padding:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    color:#11998e;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr auto;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+select,input,button{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+button{
+    background:#11998e;
+    color:white;
+    cursor:pointer;
+    border:none;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#0d7f76;
+    transform:scale(1.03);
+}
+
+.download-btn{
+    width:100%;
+    margin-bottom:15px;
+    background:#ff9800;
+}
+
+.download-btn:hover{
+    background:#e68900;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+th{
+    background:#e8fff6;
+}
+
+.remove{
+    color:red;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+footer{
+    margin-top:20px;
+    text-align:center;
+    font-size:14px;
+}
+
+footer a{
+    text-decoration:none;
+    color:#11998e;
+    font-weight:bold;
+}
+
+footer a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:600px){
+    .form-row{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Healthy Diet Planner</h1>
+
+<div class="form-row">
+    <select id="mealType">
+        <option value="">Select Meal</option>
+        <option>Early Morning</option>
+        <option>Breakfast</option>
+        <option>Mid Meal</option>
+        <option>Lunch</option>
+        <option>Evening Snack</option>
+        <option>Dinner</option>
+    </select>
+
+    <input type="text" id="foodItem" placeholder="Food Item">
+    <input type="text" id="calories" placeholder="Calories (Optional)">
+    <button onclick="addRow()">Add</button>
+</div>
+
+<button class="download-btn" onclick="downloadPDF()">Download Stylish PDF</button>
+
+<table>
+<thead>
+<tr>
+    <th>Meal</th>
+    <th>Food</th>
+    <th>Calories</th>
+    <th>Remove</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<footer>
+    Created by 
+    <a href="https://t.me/maxmentor" target="_blank">
+        MaxMentor
+    </a>
+</footer>
+
+<script>
+
+function addRow(){
+    let meal = document.getElementById("mealType").value;
+    let food = document.getElementById("foodItem").value;
+    let cal = document.getElementById("calories").value;
+
+    if(meal === "" || food === ""){
+        alert("Please fill required fields");
+        return;
+    }
+
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td>${meal}</td>
+        <td>${food}</td>
+        <td>${cal || "-"}</td>
+        <td class="remove" onclick="this.parentElement.remove()">✖</td>
+    `;
+
+    document.getElementById("tableBody").appendChild(tr);
+
+    document.getElementById("foodItem").value="";
+    document.getElementById("calories").value="";
+}
+
+/* -------- STYLISH PDF -------- */
+function downloadPDF(){
+
+    let rows = document.querySelectorAll("#tableBody tr");
+    if(rows.length === 0){
+        alert("No data to download");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF("p","mm","a4");
+
+    /* Header */
+    doc.setFillColor(17,153,142);
+    doc.rect(0,0,210,30,"F");
+
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(22);
+    doc.setFont("helvetica","bold");
+    doc.text("HEALTHY DIET PLAN",105,18,{align:"center"});
+
+    doc.setFontSize(11);
+    doc.text("Personal Nutrition Planner",105,25,{align:"center"});
+
+    /* Table Header */
+    let startY = 40;
+    doc.setFillColor(230,255,245);
+    doc.rect(10,startY,190,12,"F");
+
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(12);
+    doc.setFont("helvetica","bold");
+
+    doc.text("Meal",20,startY+8);
+    doc.text("Food Item",80,startY+8);
+    doc.text("Calories",160,startY+8);
+
+    /* Rows */
+    doc.setFont("helvetica","normal");
+    let y = startY + 18;
+
+    rows.forEach((row,index)=>{
+        let cols = row.querySelectorAll("td");
+
+        if(index % 2 === 0){
+            doc.setFillColor(245,255,250);
+            doc.rect(10,y-6,190,10,"F");
+        }
+
+        doc.text(cols[0].innerText,20,y);
+        doc.text(cols[1].innerText,80,y);
+        doc.text(cols[2].innerText,160,y);
+
+        y += 10;
+
+        if(y > 280){
+            doc.addPage();
+            y = 20;
+        }
+    });
+
+    /* Footer in PDF */
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text("Created by MaxMentor | https://t.me/maxmentor",105,290,{align:"center"});
+
+    doc.save("Diet_Plan_MaxMentor.pdf");
+}
+
+</script>
+
+</body>
+</html>
