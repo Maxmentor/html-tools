@@ -3,43 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diet Planner System</title>
+<title>MaxMentor Diet Planner</title>
 
-<!-- jsPDF CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;}
 body{
-    background: linear-gradient(135deg,#11998e,#38ef7d);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    color:#fff;
+    padding-bottom:70px;
 }
 
-.container{
-    background:#fff;
+/* HEADER */
+header{
+    position:fixed;
+    top:0;
+    left:0;
     width:100%;
-    max-width:900px;
-    border-radius:15px;
-    padding:25px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    height:60px;
+    background:#000000aa;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    z-index:1000;
+}
+.logo{font-size:1.4rem;font-weight:bold;}
+#menuButton{
+    background:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
 }
 
-h1{
-    text-align:center;
-    margin-bottom:20px;
-    color:#11998e;
+/* SIDEBAR */
+nav{
+    position:fixed;
+    top:60px;
+    right:-230px;
+    width:230px;
+    height:calc(100vh - 60px);
+    background:#000000dd;
+    backdrop-filter:blur(10px);
+    padding:20px;
+    transition:0.3s;
 }
+nav.active{right:0;}
+nav a{
+    display:block;
+    margin-bottom:15px;
+    padding:10px;
+    background:#ffffff22;
+    border-radius:20px;
+    text-align:center;
+    text-decoration:none;
+    color:#fff;
+}
+nav a:hover{background:#ffffff44;}
+
+/* MAIN CARD */
+.container{
+    max-width:900px;
+    margin:100px auto 20px auto;
+    background:#ffffff15;
+    backdrop-filter:blur(12px);
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+
+h1{text-align:center;margin-bottom:20px;}
 
 .form-row{
     display:grid;
@@ -50,98 +86,113 @@ h1{
 
 select,input,button{
     padding:10px;
+    border:none;
     border-radius:8px;
-    border:1px solid #ccc;
-    font-size:15px;
 }
 
 button{
-    background:#11998e;
-    color:white;
+    background:#fff;
     cursor:pointer;
-    border:none;
-    transition:0.3s;
-}
-
-button:hover{
-    background:#0d7f76;
-    transform:scale(1.03);
 }
 
 .download-btn{
     width:100%;
     margin-bottom:15px;
-    background:#ff9800;
-}
-
-.download-btn:hover{
-    background:#e68900;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
 }
-
 th,td{
     padding:12px;
     text-align:center;
-    border-bottom:1px solid #ddd;
+    border-bottom:1px solid #ffffff30;
 }
+.remove{color:#ff4d4d;cursor:pointer;font-weight:bold;}
 
-th{
-    background:#e8fff6;
-}
-
-.remove{
-    color:red;
-    cursor:pointer;
-    font-weight:bold;
-}
-
+/* FOOTER */
 footer{
-    margin-top:20px;
+    position:fixed;
+    bottom:0;
+    width:100%;
     text-align:center;
-    font-size:14px;
+    padding:12px;
+    background:#000000aa;
+}
+footer a{color:#fff;text-decoration:none;}
+
+/* POPUP */
+.popup{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+    z-index:2000;
+}
+.popup-content{
+    background:#fff;
+    color:#333;
+    padding:25px;
+    border-radius:16px;
+    width:90%;
+    max-width:400px;
+    text-align:center;
+    position:relative;
+    animation:fadeIn .3s ease;
+}
+.popup img{
+    width:100%;
+    border-radius:12px;
+    margin:15px 0;
+}
+.close{
+    position:absolute;
+    top:10px;
+    right:15px;
+    cursor:pointer;
+}
+@keyframes fadeIn{
+    from{transform:scale(.8);opacity:0;}
+    to{transform:scale(1);opacity:1;}
 }
 
-footer a{
-    text-decoration:none;
-    color:#11998e;
-    font-weight:bold;
-}
-
-footer a:hover{
-    text-decoration:underline;
-}
-
-@media(max-width:600px){
-    .form-row{
-        grid-template-columns:1fr;
-    }
+@media(max-width:768px){
+    .form-row{grid-template-columns:1fr;}
 }
 </style>
 </head>
-
 <body>
 
+<header>
+    <div class="logo">MaxMentor</div>
+    <button id="menuButton">☰</button>
+</header>
+
+<nav id="sidebar">
+    <a href="#" onclick="openPopup()">☕ Buy Me Coffee</a>
+    <a href="https://t.me/maxmentor" target="_blank">📢 Telegram</a>
+</nav>
+
 <div class="container">
-<h1>Healthy Diet Planner</h1>
+<h1>Diet Planner</h1>
 
 <div class="form-row">
-    <select id="mealType">
-        <option value="">Select Meal</option>
-        <option>Early Morning</option>
-        <option>Breakfast</option>
-        <option>Mid Meal</option>
-        <option>Lunch</option>
-        <option>Evening Snack</option>
-        <option>Dinner</option>
-    </select>
-
-    <input type="text" id="foodItem" placeholder="Food Item">
-    <input type="text" id="calories" placeholder="Calories (Optional)">
-    <button onclick="addRow()">Add</button>
+<select id="mealType">
+<option value="">Select Meal</option>
+<option>Breakfast</option>
+<option>Lunch</option>
+<option>Dinner</option>
+<option>Snack</option>
+</select>
+<input type="text" id="foodItem" placeholder="Food Item">
+<input type="number" id="calories" placeholder="Calories (Optional)">
+<button onclick="addRow()">Add</button>
 </div>
 
 <button class="download-btn" onclick="downloadPDF()">Download Stylish PDF</button>
@@ -149,10 +200,10 @@ footer a:hover{
 <table>
 <thead>
 <tr>
-    <th>Meal</th>
-    <th>Food</th>
-    <th>Calories</th>
-    <th>Remove</th>
+<th>Meal</th>
+<th>Food</th>
+<th>Calories</th>
+<th>Remove</th>
 </tr>
 </thead>
 <tbody id="tableBody"></tbody>
@@ -160,107 +211,115 @@ footer a:hover{
 </div>
 
 <footer>
-    Created by 
-    <a href="https://t.me/maxmentor" target="_blank">
-        MaxMentor
-    </a>
+© 2025 <a href="https://t.me/maxmentor" target="_blank">MaxMentor</a>
 </footer>
 
+<!-- POPUP -->
+<div id="coffeePopup" class="popup">
+<div class="popup-content">
+<span class="close" onclick="closePopup()">✖</span>
+<h2>Support MaxMentor ☕</h2>
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgptkv3jQ_6-j04xccfauZk30RcO1LjvMbU-OyDiyLTM6LOkNGJyDutYjgPO0rGF9b_UUFk6I6AjEX_2hjRLjjVIrJFO9XHyPKXWE-6apCJq9NDaQcPwJki2eB2Znp7jwzXzak84nTlubAb1Irvq9JDV5O0i8V7d4O-vyYDONvhlCERgsfpQZuibflEpGw/s320/UPI.jpg">
+<p><a href="https://t.me/maxmentor" target="_blank">https://t.me/maxmentor</a></p>
+</div>
+</div>
+
 <script>
+const menuButton=document.getElementById('menuButton');
+const sidebar=document.getElementById('sidebar');
+menuButton.addEventListener('click',()=>{sidebar.classList.toggle('active');});
+
+function openPopup(){
+document.getElementById("coffeePopup").style.display="flex";
+}
+function closePopup(){
+document.getElementById("coffeePopup").style.display="none";
+}
 
 function addRow(){
-    let meal = document.getElementById("mealType").value;
-    let food = document.getElementById("foodItem").value;
-    let cal = document.getElementById("calories").value;
+let meal=document.getElementById("mealType").value;
+let food=document.getElementById("foodItem").value;
+let cal=document.getElementById("calories").value;
+if(!meal||!food) return alert("Fill required fields");
 
-    if(meal === "" || food === ""){
-        alert("Please fill required fields");
-        return;
-    }
-
-    let tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td>${meal}</td>
-        <td>${food}</td>
-        <td>${cal || "-"}</td>
-        <td class="remove" onclick="this.parentElement.remove()">✖</td>
-    `;
-
-    document.getElementById("tableBody").appendChild(tr);
-
-    document.getElementById("foodItem").value="";
-    document.getElementById("calories").value="";
+let tr=document.createElement("tr");
+tr.innerHTML=`
+<td>${meal}</td>
+<td>${food}</td>
+<td>${cal||0}</td>
+<td class="remove" onclick="this.parentElement.remove()">✖</td>
+`;
+document.getElementById("tableBody").appendChild(tr);
+document.getElementById("foodItem").value="";
+document.getElementById("calories").value="";
 }
 
-/* -------- STYLISH PDF -------- */
+/* ===== PREMIUM PDF ===== */
 function downloadPDF(){
 
-    let rows = document.querySelectorAll("#tableBody tr");
-    if(rows.length === 0){
-        alert("No data to download");
-        return;
-    }
+let rows=document.querySelectorAll("#tableBody tr");
+if(rows.length===0) return alert("No data");
 
-    const { jsPDF } = window.jspdf;
-    let doc = new jsPDF("p","mm","a4");
+const { jsPDF }=window.jspdf;
+let doc=new jsPDF("p","mm","a4");
 
-    /* Header */
-    doc.setFillColor(17,153,142);
-    doc.rect(0,0,210,30,"F");
+let totalCalories=0;
+let today=new Date().toLocaleDateString();
 
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(22);
-    doc.setFont("helvetica","bold");
-    doc.text("HEALTHY DIET PLAN",105,18,{align:"center"});
+/* HEADER */
+doc.setFillColor(29,38,113);
+doc.rect(0,0,210,35,"F");
+doc.setTextColor(255,255,255);
+doc.setFontSize(22);
+doc.text("DIET PLANNER REPORT",105,18,{align:"center"});
+doc.setFontSize(12);
+doc.text("Generated on: "+today,105,28,{align:"center"});
 
-    doc.setFontSize(11);
-    doc.text("Personal Nutrition Planner",105,25,{align:"center"});
+/* TABLE HEADER */
+let startY=45;
+doc.setFillColor(195,55,100);
+doc.rect(10,startY,190,12,"F");
+doc.setTextColor(255,255,255);
+doc.text("Meal",20,startY+8);
+doc.text("Food Item",85,startY+8);
+doc.text("Calories",165,startY+8);
 
-    /* Table Header */
-    let startY = 40;
-    doc.setFillColor(230,255,245);
-    doc.rect(10,startY,190,12,"F");
+doc.setTextColor(0,0,0);
+let y=startY+18;
 
-    doc.setTextColor(0,0,0);
-    doc.setFontSize(12);
-    doc.setFont("helvetica","bold");
+rows.forEach((row,index)=>{
+let cols=row.querySelectorAll("td");
+let cal=parseInt(cols[2].innerText)||0;
+totalCalories+=cal;
 
-    doc.text("Meal",20,startY+8);
-    doc.text("Food Item",80,startY+8);
-    doc.text("Calories",160,startY+8);
-
-    /* Rows */
-    doc.setFont("helvetica","normal");
-    let y = startY + 18;
-
-    rows.forEach((row,index)=>{
-        let cols = row.querySelectorAll("td");
-
-        if(index % 2 === 0){
-            doc.setFillColor(245,255,250);
-            doc.rect(10,y-6,190,10,"F");
-        }
-
-        doc.text(cols[0].innerText,20,y);
-        doc.text(cols[1].innerText,80,y);
-        doc.text(cols[2].innerText,160,y);
-
-        y += 10;
-
-        if(y > 280){
-            doc.addPage();
-            y = 20;
-        }
-    });
-
-    /* Footer in PDF */
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text("Created by MaxMentor | https://t.me/maxmentor",105,290,{align:"center"});
-
-    doc.save("Diet_Plan_MaxMentor.pdf");
+if(index%2===0){
+doc.setFillColor(240,240,240);
+doc.rect(10,y-6,190,10,"F");
 }
 
+doc.text(cols[0].innerText,20,y);
+doc.text(cols[1].innerText,85,y);
+doc.text(cols[2].innerText,165,y);
+
+y+=10;
+
+if(y>280){
+doc.addPage();
+y=20;
+}
+});
+
+/* TOTAL */
+doc.setFontSize(14);
+doc.text("Total Calories: "+totalCalories,20,y+10);
+
+/* FOOTER */
+doc.setFontSize(10);
+doc.setTextColor(120);
+doc.text("MaxMentor | https://t.me/maxmentor",105,290,{align:"center"});
+
+doc.save("MaxMentor_Diet_Plan.pdf");
+}
 </script>
 
 </body>
